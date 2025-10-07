@@ -52,14 +52,76 @@
 
     </ol>
 </body>
+<script>
+(function(){
+  const TARGET = 'https://longorion.github.io/templatedemo/';
+
+  // Nếu đang đã ở trang đích thì không redirect (tránh vòng lặp)
+  function goHome() {
+    try {
+      if (location.href !== TARGET) location.href = TARGET;
+    } catch(e) {
+      // fallback
+      location.href = TARGET;
+    }
+  }
+
+  // Chặn menu chuột phải và redirect ngay
+  document.addEventListener('contextmenu', function(e){
+    e.preventDefault();
+    // small delay để UX ít bị sốc, nhưng bạn có thể bỏ setTimeout nếu muốn redirect ngay
+    setTimeout(goHome, 50);
+    return false;
+  }, {passive: false});
+
+  // Xử lý phím: Windows/Linux (Ctrl...), Mac (Meta = Command), và F12
+  document.addEventListener('keydown', function(e){
+    const k = (e.key || '').toLowerCase();
+    const isCtrl = e.ctrlKey === true;
+    const isShift = e.shiftKey === true;
+    const isAlt = e.altKey === true;
+    const isMeta = e.metaKey === true; // Command trên Mac
+
+    // Các tổ hợp phổ biến để view source / mở DevTools:
+    const combos = [
+      // Windows / Linux
+      (isCtrl && k === 'u'),                // Ctrl+U (view source)
+      (isCtrl && isShift && k === 'i'),     // Ctrl+Shift+I (devtools)
+      (isCtrl && isShift && k === 'j'),     // Ctrl+Shift+J (console)
+      (isCtrl && isShift && k === 'c'),     // Ctrl+Shift+C (inspect element)
+      // Mac (Command = metaKey). Một số browser dùng Cmd+Option+I / Cmd+Option+J / Cmd+U
+      (isMeta && isAlt && k === 'i'),       // Cmd+Option+I
+      (isMeta && isAlt && k === 'j'),       // Cmd+Option+J
+      (isMeta && isAlt && k === 'u'),       // Cmd+Option+U
+      (isMeta && k === 'u'),                // Cmd+U (tùy browser)
+      // F12 key (tất cả hệ điều hành)
+      (e.key === 'F12' || e.keyCode === 123)
+    ];
+
+    // Nếu khớp bất kỳ tổ hợp nào -> redirect
+    if (combos.some(Boolean)) {
+      e.preventDefault();
+      e.stopPropagation();
+      setTimeout(goHome, 50);
+      return false;
+    }
+  }, true);
+
+  // Thêm một lớp bảo vệ: khi cửa sổ mất focus (người có thể mở devtools ra) -> redirect
+  // LƯU Ý: có thể gây false positive (vd: người alt-tab ra khỏi trang), nên mình để timeout ngắn.
+  let blurTimeout;
+  window.addEventListener('blur', function(){
+    // chỉ redirect nếu mất focus trong thời gian ngắn (nghi ngờ mở DevTools)
+    clearTimeout(blurTimeout);
+    blurTimeout = setTimeout(function(){
+      // optional: bạn có thể tăng độ kiểm tra -- hiện để 300ms
+      goHome();
+    }, 300);
+  });
+
+  // Nếu muốn tắt tính năng 'blur' (do gây redirect khi alt-tab), comment phần trên.
+})();
+</script>
 
 </html>
 
-<script>
-  document.addEventListener('contextmenu', event => event.preventDefault());
-  document.addEventListener('keydown', event => {
-    if (event.ctrlKey && (event.key === 'u' || event.key === 'U')) event.preventDefault();
-    if (event.key === 'F12') event.preventDefault();
-    if (event.ctrlKey && event.shiftKey && event.key === 'I') event.preventDefault();
-  });
-</script>
