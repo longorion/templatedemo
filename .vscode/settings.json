@@ -1,0 +1,9 @@
+{
+    "editor.fontSize": 15,
+    "files.associations": {
+        "*.tpl": "html"
+    },
+    "files.autoSave": "afterDelay",
+    "editor.wordWrap": "on",
+    "editor.wordWrapColumn": 120
+}
